@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!-- project: 1.name 改為eclipse專案名稱    -->
+<!--          2.gwt.sdk 改為 GWT SDK目錄 -->
+<project name="gwt006" default="flow" basedir=".">
+	<property name="gwt.args" value="" />
+	<property name="gwt.sdk" location="C:\Program Files\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.6.0\gwt-2.6.0" />
+	<path id="project.class.path">
+		<pathelement location="war/WEB-INF/classes" />
+		<pathelement location="${gwt.sdk}/gwt-user.jar" />
+        <pathelement location="war/WEB-INF/lib/mysql-connector-java-5.1.13-bin.jar"/>
+		<fileset dir="${gwt.sdk}" includes="gwt-dev*.jar" />
+		<fileset dir="war/WEB-INF/lib" includes="**/*.jar" />
+	</path>
+
+	<target name="flow" depends="clean,prepare,javac,gwtc,war" />
+
+	<!-- clean -->
+	<target name="clean">
+		<delete dir="war/WEB-INF/classes" failonerror="false" />
+		<delete dir="war/${ant.project.name}" failonerror="false" />
+	</target>
+
+	<!-- prepare -->
+	<target name="prepare">
+		<mkdir dir="war/WEB-INF/lib" />
+		<mkdir dir="war/WEB-INF/classes" />
+		<copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet.jar" />
+	</target>
+
+	<!-- compile java to class -->
+	<target name="javac">
+		<javac srcdir="src" includes="**" encoding="utf-8" destdir="war/WEB-INF/classes" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
+			<classpath refid="project.class.path" />
+		</javac>
+		<copy todir="war/WEB-INF/classes">
+			<fileset dir="src" excludes="**/*.java" />
+		</copy>
+	</target>
+	<!-- compile class to js -->
+	<target name="gwtc" depends="javac">
+		<java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+			<classpath>
+				<pathelement location="src" />
+				<path refid="project.class.path" />
+			</classpath>
+			<jvmarg value="-Xmx256M" />
+			<arg line="${gwt.args}" />
+			<arg value="test.${ant.project.name}" />
+			<!-- *.gwt.xml的位置 -->
+		</java>
+	</target>
+
+	<!--  -->
+	<target name="war">
+		<zip destfile="${ant.project.name}.war" basedir="war" />
+	</target>
+
+</project>
